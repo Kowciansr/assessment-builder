@@ -21,7 +21,6 @@ app.use('/api', apiRoutes);
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../frontend/dist/index.html')));
 
-npm install && cd ../frontend && npm install && npm run build
 // ---- Health check ----
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
