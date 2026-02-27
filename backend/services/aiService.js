@@ -1,7 +1,6 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const MODEL = process.env.GEMINI_MODEL || 'gemini-pro';
+const Groq = require('groq-sdk');
+const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const MODEL = 'llama3-70b-8192';
 
 const BLOOMS_VERBS = {
   remember: ['recall', 'recognize', 'identify', 'list', 'name', 'define', 'state', 'match', 'label', 'describe'],
