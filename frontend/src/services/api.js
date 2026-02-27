@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-const api = axios.create({ baseURL: '/api' });
-
+const api = axios.create({ baseURL: 'https://assessment-builder-1.onrender.com/api' });
 api.interceptors.response.use(
   (res) => res.data,
   (err) => Promise.reject(err.response?.data?.error || err.message || 'Request failed')
