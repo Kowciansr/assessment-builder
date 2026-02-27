@@ -3,12 +3,21 @@ const db = require('../db/schema');
 const aiService = require('../services/aiService');
 
 // Helper to parse JSON fields from DB rows
+function safeJsonParse(value, fallback) {
+  if (!value) return fallback;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+}
+
 function parseQuestion(row) {
   if (!row) return null;
   return {
     ...row,
-    tags: row.tags ? JSON.parse(row.tags) : [],
-    qa_feedback: row.qa_feedback ? JSON.parse(row.qa_feedback) : null,
+    tags: safeJsonParse(row.tags, []),
+    qa_feedback: safeJsonParse(row.qa_feedback, null),
   };
 }
 
