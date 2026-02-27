@@ -31,7 +31,7 @@ async function exportQuestions(req, res) {
 
     const questions = getQuestions(ids, bank_only);
     if (questions.length === 0) {
-      return res.status(400).json({ success: false, error: 'No questions found to export' });
+      return res.status(400).json({ success: false, error: 'No questions found to export. Make sure questions are saved to the bank first.' });
     }
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
