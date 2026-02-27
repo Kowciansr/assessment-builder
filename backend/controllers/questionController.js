@@ -4,10 +4,11 @@ const aiService = require('../services/aiService');
 
 // Helper to parse JSON fields from DB rows
 function safeJsonParse(value, fallback) {
-  if (!value) return fallback;
+  if (!value || value.trim() === '') return fallback;
   try {
     return JSON.parse(value);
-  } catch {
+  } catch (e) {
+    console.warn('Failed to parse JSON:', value, e.message);
     return fallback;
   }
 }
