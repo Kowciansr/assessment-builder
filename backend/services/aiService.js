@@ -15,8 +15,9 @@ async function callGroq(systemPrompt, userPrompt, temperature = 0.7) {
   const response = await client.chat.completions.create({
     model: MODEL,
     temperature,
+    max_tokens: 4000,
     messages: [
-      { role: 'system', content: systemPrompt + ' Return only valid JSON. No markdown fences.' },
+      { role: 'system', content: systemPrompt + ' Return only valid JSON. No markdown fences. Be concise.' },
       { role: 'user', content: userPrompt },
     ],
   });
@@ -24,7 +25,15 @@ async function callGroq(systemPrompt, userPrompt, temperature = 0.7) {
   try {
     return JSON.parse(text);
   } catch (e) {
-    return JSON.parse(text.replace(/```json|```/g, '').trim());
+    const clean = text.replace(/```json|```/g, '').trim();
+    // Fix truncated JSON by finding last complete object
+    const lastBracket = clean.lastIndexOf('}');
+    const fixed = clean.substring(0, lastBracket + 1) + ']';
+    try {
+      return JSON.parse(fixed);
+    } catch(e2) {
+      throw new Error('Unexpected end of JSON input');
+    }
   }
 }
 
