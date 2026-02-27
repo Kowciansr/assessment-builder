@@ -1,8 +1,7 @@
 const Groq = require('groq-sdk');
 
 const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
-const MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
-
+const MODEL = 'llama-3.3-70b-versatile';
 const BLOOMS_VERBS = {
   remember: ['recall', 'recognize', 'identify', 'list', 'name', 'define', 'state', 'match', 'label', 'describe'],
   understand: ['explain', 'summarize', 'paraphrase', 'classify', 'compare', 'interpret', 'illustrate', 'discuss'],
