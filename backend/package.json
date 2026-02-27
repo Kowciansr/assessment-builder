@@ -7,7 +7,7 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.15.0",
+    "groq-sdk": "^0.5.0",
     "better-sqlite3": "^9.4.3",
     "cors": "^2.8.5",
     "docx": "^8.5.0",
