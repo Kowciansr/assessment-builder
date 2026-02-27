@@ -11,20 +11,23 @@ const BLOOMS_VERBS = {
   create: ['design', 'create', 'develop', 'formulate', 'construct', 'plan', 'produce', 'compose', 'generate'],
 };
 
-async function callGemini(systemPrompt, userPrompt, temperature = 0.7) {
-  const model = genAI.getGenerativeModel({
+async function callGroq(systemPrompt, userPrompt, temperature = 0.7) {
+  const response = await client.chat.completions.create({
     model: MODEL,
-    systemInstruction: systemPrompt,
-    generationConfig: { temperature, responseMimeType: 'application/json' },
+    temperature,
+    messages: [
+      { role: 'system', content: systemPrompt + ' Return only valid JSON.' },
+      { role: 'user', content: userPrompt },
+    ],
   });
-  const result = await model.generateContent(userPrompt);
-  const text = result.response.text();
+  const text = response.choices[0].message.content;
   try {
     return JSON.parse(text);
   } catch (e) {
     return JSON.parse(text.replace(/```json|```/g, '').trim());
   }
 }
+
 
 const GENERATION_SYSTEM_PROMPT = `You are an expert instructional designer with deep knowledge of Bloom's Taxonomy and educational assessment.
 
