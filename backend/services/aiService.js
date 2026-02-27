@@ -1,4 +1,5 @@
 const Groq = require('groq-sdk');
+
 const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const MODEL = 'llama3-70b-8192';
 
@@ -16,7 +17,7 @@ async function callGroq(systemPrompt, userPrompt, temperature = 0.7) {
     model: MODEL,
     temperature,
     messages: [
-      { role: 'system', content: systemPrompt + ' Return only valid JSON.' },
+      { role: 'system', content: systemPrompt + ' Return only valid JSON. No markdown fences.' },
       { role: 'user', content: userPrompt },
     ],
   });
@@ -27,7 +28,6 @@ async function callGroq(systemPrompt, userPrompt, temperature = 0.7) {
     return JSON.parse(text.replace(/```json|```/g, '').trim());
   }
 }
-
 
 const GENERATION_SYSTEM_PROMPT = `You are an expert instructional designer with deep knowledge of Bloom's Taxonomy and educational assessment.
 
@@ -73,7 +73,7 @@ Return a JSON array of exactly ${count} objects with these fields:
   "blooms_level": "${bloomsLevel}",
   "difficulty": "${difficulty}",
   "objective_alignment": "1 sentence",
-  "confidence_score": number 1-10
+  "confidence_score": number between 1 and 10
 }]`;
 }
 
@@ -106,7 +106,7 @@ Return JSON:
 const BLOOMS_ORDER = ['remember', 'understand', 'apply', 'analyze', 'evaluate', 'create'];
 
 async function generateQuestions({ content, objectives, questionType, bloomsLevel, difficulty, count }) {
-  const parsed = await callGemini(GENERATION_SYSTEM_PROMPT, buildGenerationPrompt({ content, objectives, questionType, bloomsLevel, difficulty, count }), 0.7);
+  const parsed = await callGroq(GENERATION_SYSTEM_PROMPT, buildGenerationPrompt({ content, objectives, questionType, bloomsLevel, difficulty, count }), 0.7);
   if (Array.isArray(parsed)) return parsed;
   if (parsed.questions && Array.isArray(parsed.questions)) return parsed.questions;
   const firstKey = Object.keys(parsed)[0];
@@ -115,11 +115,12 @@ async function generateQuestions({ content, objectives, questionType, bloomsLeve
 }
 
 async function validateQuestion(question, content, objectives) {
-  return await callGemini('You are a psychometrician. Return only valid JSON.', buildQAPrompt(question, content, objectives), 0.2);
+  return await callGroq('You are a psychometrician.', buildQAPrompt(question, content, objectives), 0.2);
 }
 
 async function improveDistractors(question, content) {
-  return await callGemini('You are an assessment specialist. Return only valid JSON.', `Improve the distractors for this question to represent better misconceptions.
+  return await callGroq('You are an assessment specialist.',
+    `Improve the distractors for this question to represent better misconceptions.
 CONTENT: ${content || ''}
 QUESTION: ${JSON.stringify(question)}
 Return JSON: {"distractor_1": "string", "distractor_2": "string", "distractor_3": "string", "rationale": "string"}`, 0.7);
@@ -129,7 +130,7 @@ async function increaseCognitiveLevel(question) {
   const currentIndex = BLOOMS_ORDER.indexOf(question.blooms_level);
   if (currentIndex === BLOOMS_ORDER.length - 1) throw new Error("Already at highest Bloom's level (Create)");
   const targetLevel = BLOOMS_ORDER[currentIndex + 1];
-  return await callGemini('You are an instructional designer. Return only valid JSON.',
+  return await callGroq('You are an instructional designer.',
     `Rewrite this question to target Bloom's level: ${targetLevel.toUpperCase()} (verbs: ${BLOOMS_VERBS[targetLevel].join(', ')})
 QUESTION: ${JSON.stringify(question)}
 Return JSON: {"question_text":"string","correct_answer":"string","distractor_1":"string","distractor_2":"string","distractor_3":"string","explanation":"string","blooms_level":"${targetLevel}","objective_alignment":"string","confidence_score":number}`, 0.7);
